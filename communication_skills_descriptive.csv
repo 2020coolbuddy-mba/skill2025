@@ -1,0 +1,39 @@
+﻿QuestionID,Section,Question,Type
+1,B. Error Detection / Sentence Correction,He don’t like coffee.,short
+2,B. Error Detection / Sentence Correction,She is senior than me in college.,short
+3,B. Error Detection / Sentence Correction,Each of the boys have a book.,short
+4,B. Error Detection / Sentence Correction,I am knowing the answer.,short
+5,B. Error Detection / Sentence Correction,The furniture are old.,short
+6,B. Error Detection / Sentence Correction,He has completed the work yesterday.,short
+7,B. Error Detection / Sentence Correction,Neither he nor his friends was guilty.,short
+8,B. Error Detection / Sentence Correction,She prefers tea than coffee.,short
+9,B. Error Detection / Sentence Correction,I look forward to meet you.,short
+10,B. Error Detection / Sentence Correction,They discussed about the problem.,short
+11,D. Writing Skills,Write a short email to your professor asking for project guidance,short
+12,D. Writing Skills,Draft a leave application for 2 days due to illness.,short
+13,D. Writing Skills,Write a 4-line formal message inviting classmates for a seminar.,short
+14,D. Writing Skills,Write a 5-line self-introduction.,short
+15,D. Writing Skills,"Rewrite this sentence formally: “I can’t come, super busy rn.”",short
+16,D. Writing Skills,Expand this into a professional email: “Pls send report asap.”,short
+17,D. Writing Skills,Write 3 sentences using “although.”,short
+18,D. Writing Skills,Write 3 sentences using “however.”,short
+19,D. Writing Skills,Correct this: “He don’t has any idea.”,short
+20,D. Writing Skills,Correct this: “She enjoy to play cricket.”,short
+21,F. Comprehension Passages,"Teamwork is an essential skill in the modern workplace. Companies prefer employees who can collaborate effectively, share responsibilities, and support one another. A team player not only contributes ideas but also respects others’ opinions. Good communication within a team ensures that tasks are completed efficiently. However, teamwork is not always easy, as differences in perspective can sometimes lead to conflicts. Successful teams learn to manage disagreements respectfully and focus on the common goal.",info
+22,F. Comprehension Passages,Why do companies prefer employees with teamwork skills?,short
+23,F. Comprehension Passages,What are two qualities of a good team player?,short
+24,F. Comprehension Passages,What ensures tasks are completed efficiently?,short
+25,F. Comprehension Passages,What challenge can arise in team work?,short
+26,F. Comprehension Passages,"Find a word from the passage that means ""help one another""",short
+27,F. Comprehension Passages,"Books have always been considered a valuable source of knowledge. Reading not only improves vocabulary but also develops imagination and critical thinking. Unlike television or social media, reading requires active engagement of the mind. Many successful people consider reading as a daily habit that helps them grow both personally and professionally. However, in recent years, the habit of reading has declined due to the popularity of smartphones and digital entertainment. Encouraging young people to read can help them gain wisdom and creativity.",info
+28,F. Comprehension Passages,List two benefits of Reading books.,short
+29,F. Comprehension Passages,How is reading different from television or social media?,short
+30,F. Comprehension Passages,What habbit do many successful people follow?,short
+31,F. Comprehension Passages,Why has the habit of reading declined?,short
+32,F. Comprehension Passages,"Find a synonym of ""decreased"" in the passage",short
+33,F. Comprehension Passages,"In today’s world, technology plays a crucial role in communication. Video calls, emails, and messaging apps allow people to stay connected across long distances. While technology has made communication faster and more convenient, it also has drawbacks. People often become dependent on devices and may lose the ability to interact face-to-face. Excessive use of technology can reduce personal connections and lead to feelings of isolation. Thus, it is important to balance digital communication with reallife conversations.",info
+34,F. Comprehension Passages,List two advantages of technology in communication,short
+35,F. Comprehension Passages,What is one drawback of depending too much on devices?,short
+36,F. Comprehension Passages,What negative effect can excessive technology use create?,short
+37,F. Comprehension Passages,What balance should people maintain in communication?,short
+38,F. Comprehension Passages,"Find a synonym of ""important"" from the passgae.",short

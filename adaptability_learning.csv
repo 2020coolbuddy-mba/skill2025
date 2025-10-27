@@ -1,0 +1,31 @@
+﻿QuestionID,Section,Question,Type,ScaleMin,ScaleMax
+A1,Adaptability Skills,I remain calm and positive when unexpected changes occur.,likert,1,5
+A2,Adaptability Skills,I can adjust my plans quickly if circumstances change.,likert,1,5
+A3,Adaptability Skills,"I am open to trying new ways of doing things, even if I am used to a routine.",likert,1,5
+A4,Adaptability Skills,"When faced with challenges, I look for alternative solutions instead of giving up.",likert,1,5
+A5,Adaptability Skills,I feel comfortable working with new people or in unfamiliar environments.,likert,1,5
+A6,Adaptability Skills,I can easily switch between different tasks or subjects without losing focus.,likert,1,5
+A7,Adaptability Skills,I welcome constructive criticism as an opportunity to improve.,likert,1,5
+A8,Adaptability Skills,I take initiative to adapt when technology or methods change in my field.,likert,1,5
+A9,Adaptability Skills,I see change as an opportunity rather than a threat.,likert,1,5
+A10,Adaptability Skills,I am willing to step out of my comfort zone to learn something new.,likert,1,5
+A11,Adaptability Skills,I quickly grasp new concepts and ideas.,likert,1,5
+A12,Adaptability Skills,I experiment with new methods to improve results.,likert,1,5
+A13,Adaptability Skills,I actively seek opportunities to expand my knowledge.,likert,1,5
+A14,Adaptability Skills,I analyze my mistakes to avoid repeating them.,likert,1,5
+A15,Adaptability Skills,I can connect past learning to solve current problems.,likert,1,5
+A16,Adaptability Skills,I enjoy taking on unfamiliar challenges.,likert,1,5
+A17,Adaptability Skills,I learn effectively from observing others.,likert,1,5
+A18,Adaptability Skills,I adjust my learning style depending on the situation.,likert,1,5
+A19,Adaptability Skills,I apply feedback constructively to improve future performance.,likert,1,5
+A20,Adaptability Skills,I proactively look for learning opportunities outside my comfort zone.,likert,1,5
+L1,Learning Orientation,I actively seek opportunities to learn beyond the classroom.,likert,1,5
+L2,Learning Orientation,I reflect on my past mistakes to improve future performance.,likert,1,5
+L3,Learning Orientation,"I enjoy learning new concepts, even if they are challenging.",likert,1,5
+L4,Learning Orientation,I ask questions or seek help when I do not understand something.,likert,1,5
+L5,Learning Orientation,I set personal learning goals and track my progress.,likert,1,5
+L6,Learning Orientation,"I use different strategies (videos, books, discussions, practice) to learn better.",likert,1,5
+L7,Learning Orientation,I connect what I learn in class to real-world applications.,likert,1,5
+L8,Learning Orientation,I am motivated to keep learning even without external rewards.,likert,1,5
+L9,Learning Orientation,I collaborate with peers to enhance my understanding of topics.,likert,1,5
+L10,Learning Orientation,I believe continuous learning is essential for success in my career.,likert,1,5

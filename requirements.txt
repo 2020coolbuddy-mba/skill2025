@@ -1,0 +1,6 @@
+streamlit
+pandas
+firebase-admin
+plotly
+gspread
+sentence-transformers

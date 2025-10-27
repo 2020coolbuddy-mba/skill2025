@@ -1,0 +1,98 @@
+﻿QuestionID,Section,Question,Option1,Option2,Option3,Option4,Correct,Type
+1,A - Quantitative Aptitude,The sum of two numbers is 50 and their difference is 6. Find the numbers.,"28, 22","26, 24","23, 27","30, 20","26, 24",mcq
+2,A - Quantitative Aptitude,A train 120 meters long passes a pole in 12 seconds. Find the speed of the train.,10 m/s,12 m/s,15 m/s,20 m/s,10 m/s,mcq
+3,A - Quantitative Aptitude,"If 3 workers can complete a task in 12 days, how many workers are required to complete it in 6 days?",3,4,6,9,6,mcq
+4,A - Quantitative Aptitude,"A sum of Rs.10,000 amounts to Rs.12,000 in 2 years at simple interest. What is the rate of interest?",10%,12%,15%,20%,10%,mcq
+5,A - Quantitative Aptitude,"If the ratio of ages of A and B is 5:7 and A is 25 years old, what is B's age?",30,35,40,45,35,mcq
+6,A - Quantitative Aptitude,A shopkeeper buys an article for Rs.500 and sells it for Rs.650. Find the profit percentage.,20%,25%,30%,32%,30%,mcq
+7,A - Quantitative Aptitude,Solve: (3/5) ÷ (9/10).,3-Feb,2-Mar,6-May,5-Jun,3-Feb,mcq
+8,A - Quantitative Aptitude,A student scores 240 marks out of 300. Find the percentage.,70%,75%,80%,85%,80%,mcq
+9,A - Quantitative Aptitude,"If the perimeter of a square is 48 cm, what is its area?",64 cm²,144 cm²,196 cm²,256 cm²,144 cm²,mcq
+10,A - Quantitative Aptitude,"A person spends 40% of his income on rent, 20% on food and saves Rs.6000. If his income is Rs.25000, how much does he spend on food?",Rs.4000,Rs.5000,Rs.6000,Rs.7000,Rs.5000,mcq
+11,A - Quantitative Aptitude,A boat goes 12 km downstream in 3 hours and returns in 4 hours. Find the speed of the boat in still water.,2 km/h,3 km/h,4 km/h,5 km/h,4 km/h,mcq
+12,A - Quantitative Aptitude,"The average of 10 numbers is 45. If one number is removed, the average becomes 44. Find the removed number.",55,50,45,40,55,mcq
+13,A - Quantitative Aptitude,The LCM of 72 and 120 is :,240,360,480,720,360,mcq
+14,A - Quantitative Aptitude,The compound interest on Rs.5000 at 10% for 2 years is :,1000,1050,1100,1200,1050,mcq
+15,A - Quantitative Aptitude,A man buys 15 pens for Rs.180 and sells them at 20% profit. Find the selling price of each pen.,Rs.12,Rs.14,Rs.16,Rs.18,Rs.14,mcq
+16,A - Quantitative Aptitude,A and B together can complete a work in 12 days. B alone can do it in 30 days. In how many days can A alone do it?,15,18,20,25,20,mcq
+17,A - Quantitative Aptitude,"If a car runs at 60 km/h, how long will it take to cover 240 km?",2 hrs,3 hrs,4 hrs,5 hrs,4 hrs,mcq
+18,A - Quantitative Aptitude,A cube has side 7 cm. Find its volume.,240 cm³,343 cm³,370 cm³,420 cm³,343 cm³,mcq
+19,A - Quantitative Aptitude,The average marks of 50 students is 72. Find the total marks.,3200,3400,3600,3800,3600,mcq
+20,A - Quantitative Aptitude,A man rows 12 km downstream in 3 hours and 6 km upstream in 2 hours. Speed of stream = ?,1 km/h,2 km/h,3 km/h,4 km/h,1 km/h,mcq
+21,A - Quantitative Aptitude,A tank fills by a pipe in 20 minutes and empties by another in 30 minutes. How long will it take to fill the tank if both are opened?,40 min,50 min,60 min,70 min,60 min,mcq
+22,A - Quantitative Aptitude,Find the value of (25)³/(25x25).,75,100,25,150,25,mcq
+23,A - Quantitative Aptitude,"A number is divided by 13, remainder is 5. If the same number is divided by 26, remainder will be :",3,5,10,15,5,mcq
+24,A - Quantitative Aptitude,Solve for x : 2x + 5 = 19.,5,6,7,8,7,mcq
+25,B - Logical Reasoning,"Find the missing number: 2, 6, 12, 20, ?",30,24,28,32,30,mcq
+26,B - Logical Reasoning,"If BOOK ? CPLL, then PEN ? ?",QFP,QFN,QFM,QFL,QFP,mcq
+27,B - Logical Reasoning,"Which is the odd one out? (Lion, Tiger, Leopard, Fox)",Lion,Tiger,Leopard,Fox,Fox,mcq
+28,B - Logical Reasoning,"Arrange in sequence: Application, Interview, Offer Letter, Written Test.","Written Test, Interview, Application, Offer Letter","Application, Interview, Offer Letter, Written Test","Written Test, Application, Interview, Offer Letter","Interview, Written Test, Application, Offer Letter","Written Test, Application, Interview, Offer Letter",mcq
+29,B - Logical Reasoning,A is taller than B but shorter than C. D is shorter than C but taller than A. Who is tallest?,A,B,C,D,C,mcq
+30,B - Logical Reasoning,"If 5 machines make 5 products in 5 minutes, how long for 100 machines to make 100 products?",5 min,50 min,100 min,500 min,5 min,mcq
+31,B - Logical Reasoning,Mirror image of PQRS is ?,SRQP,SPQR,QSRP,PSRQ,SRQP,mcq
+32,B - Logical Reasoning,"Find the next term: AB, DE, HI, ?",KL,JK,LM,MN,KL,mcq
+33,B - Logical Reasoning,"If 1 = 3, 2 = 6, 3 = 9, then 5 = ?",12,15,18,21,15,mcq
+34,B - Logical Reasoning,A clock shows 4:30. What is the angle between the hands?,120°,135°,150°,90°,135°,mcq
+35,B - Logical Reasoning,"Odd one: Apple, Mango, Potato, Banana.",Apple,Mango,Potato,Banana,Potato,mcq
+36,B - Logical Reasoning,"If CAT is coded as 2013 and DOG is coded as  7154, then how is BAT coded?",2012,1022,2021,1012,2012,mcq
+37,B - Logical Reasoning,"Next number: 5, 10, 20, 40, ?",60,70,80,90,80,mcq
+38,B - Logical Reasoning,"A travels 10 km north, 10 km east, 10 km south. How far is he from start?",0 km,5 km,10 km,15 km,10 km,mcq
+39,B - Logical Reasoning,"Find missing: 3, 9, 27, ?",54,72,81,90,81,mcq
+40,B - Logical Reasoning,"If 'SCHOOL' is coded as 21-3-8-15-15-12, then 'COLLEGE' = ?",3-15-12-12-5-7-5,21-3-8-15-15-12,3-15-12-12-7-5-5,3-15-12-12-5-6-5,3-15-12-12-5-7-5,mcq
+41,B - Logical Reasoning,"Which shape comes next ? Square, Circle, Trianle, Square,",Square, Circle, Triangle, Square, Circle,mcq
+42,B - Logical Reasoning,"Odd one: Rose, Lotus, Lily, Mango.",Rose,Lotus,Lily,Mango,Mango,mcq
+43,B - Logical Reasoning,"If 3x^2 = 12, then value of x ?",2,3,4,5,2,mcq
+44,B - Logical Reasoning,"Complete: 7, 14, 28, 56, ?",64,84,98,112,112,mcq
+45,B - Logical Reasoning,"A man faces North, turns left, then right, then right again. Which direction is he facing?",East,South,West,North,East,mcq
+46,B - Logical Reasoning,"Odd one: Iron, Copper, Silver, Cotton.",Iron,Copper,Silver,Cotton,Cotton,mcq
+47,B - Logical Reasoning,Arrange letters: 'NEPOTISM' ? first and last letters interchanged ? result ?,MEPOTISN,MEPOTISM,NEPOTISM,NEPOTISN,MEPOTISN,mcq
+48,B - Logical Reasoning,"Find missing number: 4, 9, 16, 25, ?",30,36,49,64,36,mcq
+49,B - Logical Reasoning,"If APPLE = 50, BALL = 30, then CAT = ?",20,24,28,32,24,mcq
+50,C - Verbal Ability,Synonym of 'Abundant'.,Scarce,Plentiful,Tiny,Limited,Plentiful,mcq
+51,C - Verbal Ability,Correct spelling:,Environment,Enviroment,Environmant,Environmnet,Environment,mcq
+52,C - Verbal Ability,Fill in the blank: He is good ___ Mathematics.,at,in,on,for,at,mcq
+53,C - Verbal Ability,Antonym of 'Rigid'.,Flexible,Strict,Hard,Firm,Flexible,mcq
+54,C - Verbal Ability,She was praised ___ her honesty.,by,for,at,of,for,mcq
+55,C - Verbal Ability,Rearrange: Always / his / duties / honestly / performs / he.,He always performs his duties honestly.,Always he performs honestly his duties.,Honestly he always performs duties.,He performs honestly always duties.,He always performs his duties honestly.,mcq
+56,C - Verbal Ability,Passive voice: They are watching the movie.,The movie was watched by them.,The movie is watched by them.,The movie is being watched by them.,The movie has been watched by them.,The movie is being watched by them.,mcq
+57,C - Verbal Ability,Plural of Phenomenon.,Phenomenons,Phenomena,Phenomenas,Phenomenes,Phenomena,mcq
+58,C - Verbal Ability,Find the error: She don't like to play football.,She don't like to play football.,She doesn't like to play football.,She not like to play football.,She do not like play football.,She doesn't like to play football.,mcq
+59,C - Verbal Ability,"Indirect speech: He said, 'I am happy.'",He said he was happy.,He says he is happy.,He told that he happy.,He says that I am happy.,He said he was happy.,mcq
+60,C - Verbal Ability,Synonym of 'Eminent'.,Famous,Unknown,Ordinary,Minor,Famous,mcq
+61,C - Verbal Ability,Antonym of 'Optimistic'.,Hopeful,Cheerful,Pessimistic,Joyful,Pessimistic,mcq
+62,C - Verbal Ability,Fill in blank: He succeeded ___ hard work.,in,by,with,through,in,mcq
+63,C - Verbal Ability,Correct tense: She ___ (go) to school yesterday.,goes,gone,went,going,went,mcq
+64,C - Verbal Ability,Choose correct article: He is ___ honest man.,a,an,the,none,an,mcq
+65,C - Verbal Ability,Word opposite of 'Ancient'.,Old,Modern,Antique,Historic,Modern,mcq
+66,C - Verbal Ability,Choose correct: The teacher as well as the students ___ present.,is,are,were,be,is,mcq
+67,C - Verbal Ability,Fill in: He has been absent ___ Monday.,for,since,from,at,since,mcq
+68,C - Verbal Ability,Antonym of 'Transparent'.,Clear,Opaque,Obvious,Simple,Opaque,mcq
+69,C - Verbal Ability,Correct phrase: Between you and ___.,I,myself,me,mine,me,mcq
+70,C - Verbal Ability,Change to active: The letter was written by her.,She writes the letter.,She wrote the letter.,She was writing the letter.,She had written the letter.,She wrote the letter.,mcq
+71,C - Verbal Ability,Correct sentence: Neither of the two boys ___ present.,are,were,is,be,is,mcq
+72,C - Verbal Ability,Fill in: The patient died ___ cancer.,of,from,by,due to,of,mcq
+73,C - Verbal Ability,Choose correct: I prefer tea ___ coffee.,over,to,than,for,to,mcq
+74,C - Verbal Ability,Meaning of idiom: 'To hit the nail on the head'.,To make a mistake,To be exactly right,To hurt someone,To criticize sharply,To be exactly right,mcq
+75,D - General Awareness,Who is the current Prime Minister of India (2025)?,,,,,,short
+76,D - General Awareness,Currency of Japan?,,,,,,short
+77,D - General Awareness,Company that owns Instagram?,,,,,,short
+78,D - General Awareness,'Missile Man of India'?,,,,,,short
+79,D - General Awareness,Red Planet?,,,,,,short
+80,D - General Awareness,Land of Rising Sun (Indian state)?,,,,,,short
+81,D - General Awareness,Largest ocean?,,,,,,short
+82,D - General Awareness,UN headquarters city?,,,,,,short
+83,D - General Awareness,Author of 'Wings of Fire'?,,,,,,short
+84,D - General Awareness,National animal of India?,,,,,,short
+85,D - General Awareness,Capital of Australia?,,,,,,short
+86,D - General Awareness,First woman Prime Minister of India?,,,,,,short
+87,D - General Awareness,Founder of Microsoft?,,,,,,short
+88,D - General Awareness,Nobel Prize is awarded in which city?,,,,,,short
+89,D - General Awareness,World Environment Day is celebrated on?,,,,,,short
+90,D - General Awareness,Which river is longest in India?,,,,,,short
+91,D - General Awareness,National sport of Japan?,,,,,,short
+92,D - General Awareness,Currency of UK?,,,,,,short
+93,D - General Awareness,Father of Indian Constitution?,,,,,,short
+94,D - General Awareness,Smallest state in India (by area)?,,,,,,short
+95,D - General Awareness,Who invented telephone?,,,,,,short
+96,D - General Awareness,Highest civilian award in India?,,,,,,short
+97,D - General Awareness,Capital of Canada?,,,,,,short
