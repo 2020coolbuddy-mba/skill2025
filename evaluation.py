@@ -288,27 +288,79 @@ st.subheader(f"GRAND TOTAL (All Tests) = {grand_total}")
 # ------------------------------------------------------------
 # SAVE EVALUATION  (FINAL, FIXED, WORKING)
 # ------------------------------------------------------------
+# ------------------------------------------------------------
+# SAVE EVALUATION (FIXED & COMPLETE)
+# ------------------------------------------------------------
 if st.button("💾 Save Evaluation"):
 
-    if not marks_given:
-        st.error("No descriptive marks entered.")
+    # text_marks collected from UI
+    text_marks_dict = {qid: mark for qid, mark in marks_given.items()}
+
+    if not text_marks_dict:
+        st.error("No descriptive marks found! Expand questions and enter marks.")
         st.stop()
 
+    # Load auto-evaluated scores for THIS test
+    df_this = question_banks[selected_test]
+    auto_mcq = 0
+    auto_likert = 0
+
+    for r in selected_responses:
+        qid = str(r.get("QuestionID", ""))
+
+        row_match = df_this[df_this["QuestionID"].astype(str) == qid]
+        if row_match.empty:
+            continue
+
+        row = row_match.iloc[0]
+        qtype = str(row.get("Type", "")).lower()
+
+        # MCQ
+        if qtype == "mcq":
+            correct = str(row.get("Answer", "")).strip()
+            if str(r.get("Response", "")).strip() == correct:
+                auto_mcq += 1
+
+        # LIKERT
+        elif qtype == "likert":
+            try:
+                val = int(r.get("Response", 0))
+                auto_likert += max(0, min(4, val - 1))
+            except:
+                pass
+
+    # Descriptive total for this test
+    text_total = sum(text_marks_dict.values())
+
+    # Final per-test score
+    final_total = auto_mcq + auto_likert + text_total
+
+    # Compute NEW GRAND TOTAL (all tests)
+    doc_scores, mcq_all, likert_all = compute_auto_scores_for_roll(docs_for_student)
+
+    # sum saved text scores from other tests
+    saved_text = 0
+    for section, doc_id in docs_for_student:
+        if section != selected_test:
+            data = doc_data_map[doc_id]
+            eval_prev = data.get("Evaluation", {})
+            saved_text += int(eval_prev.get("text_total", 0))
+
+    grand_total = mcq_all + likert_all + saved_text + text_total
+
+    # Save into Firestore
     doc_ref = db.collection("student_responses").document(selected_doc_id)
 
-    # get previous auto scores
-    existing = selected_doc_data.get("Evaluation") or {}
-    auto_mcq = existing.get("mcq_total", mcq_all)
-    auto_likert = existing.get("likert_total", likert_all)
-
     new_eval = {
-        "text_marks": marks_given,
-        "text_total": text_total_current,
-        "mcq_total": mcq_all,
-        "likert_total": likert_all,
-        "grand_total": mcq_all + likert_all + text_total_current
+        "mcq_total": auto_mcq,
+        "likert_total": auto_likert,
+        "text_total": text_total,
+        "final_total": final_total,
+        "grand_total": grand_total,
+        "text_marks": text_marks_dict,
     }
 
     doc_ref.set({"Evaluation": new_eval}, merge=True)
 
     st.success("Evaluation saved successfully!")
+
