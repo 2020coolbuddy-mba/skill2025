@@ -412,33 +412,45 @@ st.subheader(f"GRAND TOTAL (All Tests) = {grand_total}")
 # SAVE EVALUATION
 # ------------------------------------------------------------
 if st.button("💾 Save Evaluation"):
-    # Save evaluation for the selected test document
-    this_auto_mcq = doc_scores[selected_doc_id]["mcq"]
-    this_auto_likert = doc_scores[selected_doc_id]["likert"]
-    this_final = this_auto_mcq + this_auto_likert + text_total_current
 
-    db.collection("student_responses").document(selected_doc_id).set(
-        {
-            "Evaluation": {
-                "text_marks": marks_given,
-                "text_total": text_total_current,
-                "mcq_total": this_auto_mcq,
-                "likert_total": this_auto_likert,
-                "final_total": this_final,
-                "grand_total": grand_total,
-            }
-        },
-        merge=True,
-    )
+    # text_marks_dict must already be collected from the radio buttons
+    # Example: {75: 2, 76: 1, 77: 3, ...}
 
-    # Also propagate grand_total to the other test documents for this roll
-    for section, doc_id in docs_for_student:
-        if doc_id == selected_doc_id:
-            continue
-        db.collection("student_responses").document(doc_id).set(
-            {"Evaluation": {"grand_total": grand_total}},
-            merge=True,
-        )
+    if not text_marks_dict:
+        st.error("No marks found. Expand questions and enter descriptive marks.")
+        st.stop()
 
-    st.success("Evaluation saved successfully ✅")
-    st.rerun()
+    doc_id = f"{selected_roll}_{selected_section}"
+    doc_ref = db.collection("student_responses").document(doc_id)
+
+    # Load existing evaluation safely
+    snap = doc_ref.get()
+    if snap.exists:
+        existing = snap.to_dict().get("Evaluation", {})
+    else:
+        existing = {}
+
+    # Existing values (do NOT overwrite)
+    mcq_total = existing.get("mcq_total", 0)
+    likert_total = existing.get("likert_total", 0)
+
+    # Calculate descriptive total
+    final_total = sum(text_marks_dict.values())
+
+    # Combine all
+    grand_total = mcq_total + likert_total + final_total
+
+    # Prepare updated evaluation block
+    new_eval = {
+        "text_marks": text_marks_dict,
+        "final_total": final_total,
+        "mcq_total": mcq_total,
+        "likert_total": likert_total,
+        "grand_total": grand_total
+    }
+
+    # Save safely without overwriting other fields
+    doc_ref.set({"Evaluation": new_eval}, merge=True)
+
+    st.success("Evaluation saved successfully!")
+
