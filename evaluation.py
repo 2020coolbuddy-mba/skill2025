@@ -235,15 +235,28 @@ def calc_mcq(df, responses):
 
 
 def calc_likert(df, responses):
-    if df.empty: return 0
+    if df.empty:
+        return 0
+
     total = 0
     for r in responses:
-        qid = str(r["QuestionID"])
-        val = int(r.get("Response", 0))
-        score = max(0, min(4, val - 1))
+        resp_raw = r.get("Response", 0)
+
+        # --- SAFELY HANDLE ALL BAD DATA ---
+        try:
+            resp_str = str(resp_raw).strip()
+            val = int(resp_str)
+        except:
+            val = 0   # fallback when invalid
+
+        score = max(0, min(4, val - 1))  # map Likert 1–5 → 0–4
+
+        qid = str(r.get("QuestionID", ""))
         match = df[df["QuestionID"].astype(str) == qid]
+
         if not match.empty and match.iloc[0]["Type"] == "likert":
             total += score
+
     return total
 
 
