@@ -22,6 +22,7 @@ def init_firebase():
         cred = credentials.Certificate(cfg)
         firebase_admin.initialize_app(cred)
         return firestore.client()
+
     except Exception as e:
         st.error(f"Firebase init failed: {e}")
         return None
@@ -34,9 +35,9 @@ if not db:
 st.title("📤 Export Evaluated Marks")
 
 
-# ----------------------------------------------------
-# Section Order
-# ----------------------------------------------------
+# ------------------------------------------------------------
+# CORRECT FIXED SECTION ORDER
+# ------------------------------------------------------------
 SECTION_ORDER = [
     "Adaptability & Learning",
     "Aptitude Test",
@@ -45,89 +46,69 @@ SECTION_ORDER = [
 ]
 
 
-# ----------------------------------------------------
-# Fetch all documents
-# ----------------------------------------------------
-docs = db.collection("student_responses").stream()
+# ------------------------------------------------------------
+# LOAD ALL DOCUMENTS
+# ------------------------------------------------------------
+rows = []
 
-# roll → { section → scores }
-records = {}
+docs = db.collection("student_responses").stream()
 
 for snap in docs:
     data = snap.to_dict() or {}
 
     roll = data.get("Roll")
     section = data.get("Section")
+    evalb = data.get("Evaluation") or {}
 
     if not roll or not section:
         continue
 
-    evalb = data.get("Evaluation") or {}
-
+    # Extract values
     mcq = evalb.get("mcq_total")
     likert = evalb.get("likert_total")
-    text = evalb.get("text_total")
-    final_test_score = evalb.get("final_total")
+    text = evalb.get("final_total")
+    grand = evalb.get("grand_total")
 
-    # Store clean value or N/A
-    def clean(v):
-        return v if (v not in (None, "", {}, [])) else "N/A"
+    # -----------------------------------------
+    # COMPUTE FINAL SCORE PER TEST
+    # -----------------------------------------
+    if section == "Adaptability & Learning":              # Likert only
+        final_score = likert if likert not in (None, "", 0) else "N/A"
 
-    mcq = clean(mcq)
-    likert = clean(likert)
-    text = clean(text)
-    final_test_score = clean(final_test_score)
+    elif section == "Aptitude Test":                      # MCQ + Text
+        m = mcq if isinstance(mcq, int) else 0
+        t = text if isinstance(text, int) else 0
+        final_score = m + t if (m + t) > 0 else "N/A"
 
-    if roll not in records:
-        records[roll] = {}
+    elif section == "Communication Skills - Descriptive": # Text only
+        final_score = text if text not in (None, "", 0) else "N/A"
 
-    records[roll][section] = {
-        "mcq": mcq,
-        "likert": likert,
-        "text": text,
-        "final_test_score": final_test_score
-    }
+    elif section == "Communication Skills - Objective":   # MCQ only
+        final_score = mcq if mcq not in (None, "", 0) else "N/A"
+
+    else:
+        final_score = "N/A"
+
+    # Replace None/"" with N/A for export
+    mcq = mcq if mcq not in (None, "") else "N/A"
+    likert = likert if likert not in (None, "") else "N/A"
+    text = text if text not in (None, "") else "N/A"
+    grand = grand if grand not in (None, "") else "N/A"
+
+    rows.append([
+        roll,
+        section,
+        mcq,
+        likert,
+        text,
+        final_score,
+        grand,
+    ])
 
 
-# ----------------------------------------------------
-# Build final export rows
-# ----------------------------------------------------
-rows = []
-
-for roll, tests in records.items():
-
-    # compute grand total from per-test final scores
-    grand_total = 0
-    for sec in SECTION_ORDER:
-        block = tests.get(sec, {})
-        v = block.get("final_test_score")
-        if isinstance(v, int):
-            grand_total += v
-
-    # Now create row per test (in correct order)
-    for i, sec in enumerate(SECTION_ORDER):
-        block = tests.get(sec, {})
-        mcq = block.get("mcq", "N/A")
-        likert = block.get("likert", "N/A")
-        text = block.get("text", "N/A")
-        final_test_score = block.get("final_test_score", "N/A")
-
-        # Show grand total only on 1st row of each roll
-        if i == 0:
-            g = grand_total
-        else:
-            g = ""
-
-        rows.append([
-            roll,
-            sec,
-            mcq,
-            likert,
-            text,
-            final_test_score,
-            g,
-        ])
-
+# ------------------------------------------------------------
+# BUILD DATAFRAME
+# ------------------------------------------------------------
 df = pd.DataFrame(rows, columns=[
     "Roll Number",
     "Section",
@@ -135,10 +116,42 @@ df = pd.DataFrame(rows, columns=[
     "Likert Score",
     "Text Score",
     "Final Score (This Test)",
-    "Grand Total (All Tests)"
+    "Grand Total (All Tests)",
 ])
 
-st.dataframe(df)
+# Apply section order
+cat = pd.CategoricalDtype(categories=SECTION_ORDER, ordered=True)
+df["Section"] = df["Section"].astype(cat)
+df = df.sort_values(["Roll Number", "Section"])
 
-csv = df.to_csv(index=False).encode("utf-8")
-st.download_button("⬇ Download CSV", csv, "evaluated_marks.csv", "text/csv")
+
+# ------------------------------------------------------------
+# SHOW GRAND TOTAL ONLY ON FIRST ROW OF EACH STUDENT
+# ------------------------------------------------------------
+clean_rows = []
+last = None
+
+for _, row in df.iterrows():
+    rr = row.copy()
+    if rr["Roll Number"] == last:
+        rr["Grand Total (All Tests)"] = ""
+    else:
+        last = rr["Roll Number"]
+    clean_rows.append(rr)
+
+df_final = pd.DataFrame(clean_rows)
+
+
+# ------------------------------------------------------------
+# DISPLAY & DOWNLOAD
+# ------------------------------------------------------------
+st.dataframe(df_final, use_container_width=True)
+
+csv = df_final.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    "⬇ Download CSV",
+    csv,
+    "evaluated_marks.csv",
+    "text/csv",
+)
