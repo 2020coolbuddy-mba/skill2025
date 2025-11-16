@@ -4,9 +4,9 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import json
 
-# -----------------------------
-# FIREBASE INIT
-# -----------------------------
+# -------------------------------------
+# Firebase init
+# -------------------------------------
 @st.cache_resource
 def init_firebase():
     if firebase_admin._apps:
@@ -23,7 +23,7 @@ def init_firebase():
         firebase_admin.initialize_app(cred)
         return firestore.client()
     except Exception as e:
-        st.error(f"Firebase Init Failed: {e}")
+        st.error(f"Firebase init failed: {e}")
         return None
 
 
@@ -33,38 +33,59 @@ if not db:
 
 st.title("📤 Export Evaluated Marks")
 
-# -----------------------------
-# EXPORT LOGIC
-# -----------------------------
+# -------------------------------------
+# Correct section order & scoring rules
+# -------------------------------------
+SECTION_ORDER = [
+    "Adaptability & Learning",
+    "Aptitude Test",
+    "Communication Skills - Descriptive",
+    "Communication Skills - Objective",
+]
+
 rows = []
 
 docs = db.collection("student_responses").stream()
 
-for d in docs:
-    data = d.to_dict()
+for snap in docs:
+    data = snap.to_dict() or {}
+
     roll = data.get("Roll")
     section = data.get("Section")
-    eval_block = data.get("Evaluation") or {}
+    evalb = data.get("Evaluation") or {}
 
     if not roll or not section:
         continue
 
-    mcq = eval_block.get("mcq_total", None)
-    likert = eval_block.get("likert_total", None)
-    text = eval_block.get("final_total", None)
-    final_score = 0
+    mcq = evalb.get("mcq_total")
+    likert = evalb.get("likert_total")
+    text = evalb.get("final_total")
+    grand = evalb.get("grand_total")
 
-    # Final Score for the section
-    if mcq not in (None, ""):
-        final_score += mcq
-    if likert not in (None, ""):
-        final_score += likert
-    if text not in (None, ""):
-        final_score += text
+    # ---------- FINAL SCORE PER TEST ----------
+    # A) Adaptability & Learning  -> Likert only
+    if section == "Adaptability & Learning":
+        final_score = likert if likert not in (None, "") else "N/A"
 
-    grand = eval_block.get("grand_total", None)
+    # B) Aptitude Test -> MCQ + Text
+    elif section == "Aptitude Test":
+        m = mcq if mcq not in (None, "") else 0
+        t = text if text not in (None, "") else 0
+        s = m + t
+        final_score = s if s != 0 else "N/A"
 
-    # Replace missing values
+    # C) Communication Skills – Descriptive -> Text only
+    elif section == "Communication Skills - Descriptive":
+        final_score = text if text not in (None, "") else "N/A"
+
+    # D) Communication Skills – Objective -> MCQ only
+    elif section == "Communication Skills - Objective":
+        final_score = mcq if mcq not in (None, "") else "N/A"
+
+    else:
+        final_score = "N/A"
+
+    # normalise empty to "N/A" for export
     mcq = mcq if mcq not in (None, "") else "N/A"
     likert = likert if likert not in (None, "") else "N/A"
     text = text if text not in (None, "") else "N/A"
@@ -75,38 +96,38 @@ for d in docs:
         mcq,
         likert,
         text,
-        final_score if final_score != 0 else "N/A",
-        grand       # We will clean this later
+        final_score,
+        grand,
     ])
-
 
 df = pd.DataFrame(rows, columns=[
     "Roll Number",
-    "Test Section",
+    "Section",
     "MCQ Score",
     "Likert Score",
     "Text Score",
     "Final Score (This Test)",
-    "Grand Total (All Tests)"
+    "Grand Total (All Tests)",
 ])
 
-# -----------------------------
-# FIX GRAND TOTAL — show ONLY ONCE per student
-# -----------------------------
-df_sorted = df.sort_values(["Roll Number", "Test Section"])
+# -------------------------------------
+# Apply custom section order per roll
+# -------------------------------------
+cat = pd.CategoricalDtype(categories=SECTION_ORDER, ordered=True)
+df["Section"] = df["Section"].astype(cat)
 
+df = df.sort_values(["Roll Number", "Section"])
+
+# Only show Grand Total on the first section row of each roll
 clean_rows = []
 last_roll = None
-
-for idx, row in df_sorted.iterrows():
-    r = row.copy()
-
-    if r["Roll Number"] == last_roll:
-        r["Grand Total (All Tests)"] = ""     # hide repeated values
+for _, r in df.iterrows():
+    rr = r.copy()
+    if rr["Roll Number"] == last_roll:
+        rr["Grand Total (All Tests)"] = ""
     else:
-        last_roll = r["Roll Number"]
-
-    clean_rows.append(r)
+        last_roll = rr["Roll Number"]
+    clean_rows.append(rr)
 
 df_final = pd.DataFrame(clean_rows)
 
@@ -115,8 +136,8 @@ st.dataframe(df_final)
 csv = df_final.to_csv(index=False).encode("utf-8")
 
 st.download_button(
-    "⬇ Download Marks CSV",
-    data=csv,
-    file_name="student_marks.csv",
-    mime="text/csv"
+    "⬇ Download CSV",
+    csv,
+    "evaluated_marks.csv",
+    "text/csv",
 )
