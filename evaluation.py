@@ -42,6 +42,38 @@ def init_firebase():
         st.error(f"Failed to initialise Firebase: {e}")
         return None
 
+def compute_auto_scores_for_roll(docs_for_roll):
+    """
+    Computes TOTAL MCQ and TOTAL Likert for ALL tests of the student.
+    Returns:
+        doc_scores: {doc_id: {mcq:int, likert:int}}
+        mcq_sum: int
+        likert_sum: int
+    """
+    doc_scores = {}
+    mcq_sum = 0
+    likert_sum = 0
+
+    for section, doc_id in docs_for_roll:
+        df = question_banks.get(section)
+
+        try:
+            snap = db.collection("student_responses").document(doc_id).get()
+            data = snap.to_dict() or {}
+        except:
+            data = {}
+
+        responses = data.get("Responses") or []
+
+        # Evaluate MCQ & Likert
+        mcq = calc_mcq(df, responses)
+        likert = calc_likert(df, responses)
+
+        doc_scores[doc_id] = {"mcq": mcq, "likert": likert}
+        mcq_sum += mcq
+        likert_sum += likert
+
+    return doc_scores, mcq_sum, likert_sum
 
 db = init_firebase()
 if db is None:
