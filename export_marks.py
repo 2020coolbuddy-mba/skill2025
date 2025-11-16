@@ -1,164 +1,106 @@
 import streamlit as st
 import pandas as pd
-import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# -------------------------------------------------------------
-# FIREBASE INITIALIZE
-# -------------------------------------------------------------
-@st.cache_resource
-def init_firebase():
+# ----------------------------
+# FIREBASE INITIALIZATION
+# ----------------------------
+def init_firestore():
     if firebase_admin._apps:
         return firestore.client()
 
-    try:
-        # Load from Streamlit secrets
-        cfg = dict(st.secrets["firebase"])
-        cred = credentials.Certificate(cfg)
-        firebase_admin.initialize_app(cred)
-        return firestore.client()
-    except:
-        st.error("Firebase initialization failed. Check credentials.")
-        st.stop()
-
-db = init_firebase()
-
-st.title("📊 Download Student Marks (Auto + Manual Evaluation)")
-
-# -------------------------------------------------------------
-# LOAD QUESTION BANKS (same filenames used in your evaluation)
-# -------------------------------------------------------------
-@st.cache_data
-def load_qbanks():
-    return {
-        "Aptitude Test": pd.read_csv("aptitude.csv"),
-        "Adaptability & Learning": pd.read_csv("adaptability_learning.csv"),
-        "Communication Skills - Objective": pd.read_csv("communication_skills_objective.csv"),
-        "Communication Skills - Descriptive": pd.read_csv("communication_skills_descriptive.csv"),
-    }
-
-qbanks = load_qbanks()
-
-# -------------------------------------------------------------
-# LIKERT SCORING (your correct rule)
-# 1 → 0
-# 2 → 1
-# 3 → 2
-# 4 → 3
-# 5 → 3
-# -------------------------------------------------------------
-def likert_to_score(v):
-    v = int(v)
-    if v == 1: return 0
-    if v == 2: return 1
-    if v == 3: return 2
-    if v in [4, 5]: return 3
-    return 0
+    cfg = st.secrets["firebase"]  # You already configured this in Streamlit
+    cred = credentials.Certificate(cfg)
+    firebase_admin.initialize_app(cred)
+    return firestore.client()
 
 
-# -------------------------------------------------------------
-# MCQ SCORING
-# -------------------------------------------------------------
-def get_correct_answer(row):
-    for col in ["Answer", "CorrectAnswer", "Correct", "Ans", "AnswerKey"]:
-        if col in row and not pd.isna(row[col]):
-            return str(row[col]).strip()
-    return None
+db = init_firestore()
 
 
-def calc_mcq(df, responses):
-    score = 0
-    for r in responses:
-        qid = str(r["QuestionID"])
-        ans = str(r["Response"]).strip()
-        row_df = df[df["QuestionID"].astype(str) == qid]
-        if row_df.empty:
-            continue
-        row = row_df.iloc[0]
-        if row["Type"] != "mcq":
-            continue
-        correct = get_correct_answer(row)
-        if correct and ans == correct:
-            score += 1
-    return score
+# ----------------------------
+# PLACEHOLDER FOR NON-APPLICABLE
+# ----------------------------
+NOT_APPLICABLE = "None"     # You may change to "NA", "-", "" etc.
 
 
-# -------------------------------------------------------------
-# LIKERT SCORING
-# -------------------------------------------------------------
-def calc_likert(df, responses):
-    total = 0
-    for r in responses:
-        qid = str(r["QuestionID"])
-        ans = r["Response"]
-        row_df = df[df["QuestionID"].astype(str) == qid]
-        if row_df.empty:
-            continue
-        row = row_df.iloc[0]
-        if str(row["Type"]).lower() != "likert":
-            continue
-        total += likert_to_score(ans)
-    return total
+# ----------------------------
+# SECTION APPLICABILITY MAP
+# ----------------------------
+# Only these sections have MCQ / Likert / Text scores
+SECTION_RULES = {
+    "Adaptability & Learning": {"mcq": False, "likert": True,  "text": False},
+    "Aptitude Test":           {"mcq": True,  "likert": False, "text": True},
+    "Communication Skills - Descriptive": {"mcq": False, "likert": False, "text": True},
+    "Communication Skills - Objective":   {"mcq": True,  "likert": False, "text": False},
+}
 
 
-# -------------------------------------------------------------
-# DOWNLOAD BUTTON
-# -------------------------------------------------------------
-if st.button("📥 Generate Marks Excel File"):
-    docs = list(db.collection("student_responses").stream())
-    rows = []
-    grand_totals = {}
+# ----------------------------
+# HELPER FUNCTION: Apply NA rules
+# ----------------------------
+def apply_na(section, mcq, likert, text):
+    rules = SECTION_RULES.get(section, None)
+
+    if rules is None:
+        # Unknown section → leave values as is
+        return mcq, likert, text
+
+    mcq_final   = mcq   if rules["mcq"]   else NOT_APPLICABLE
+    likert_final = likert if rules["likert"] else NOT_APPLICABLE
+    text_final   = text   if rules["text"]   else NOT_APPLICABLE
+
+    return mcq_final, likert_final, text_final
+
+
+# ----------------------------
+# STREAMLIT PAGE UI
+# ----------------------------
+st.title("📥 Download Student Marks Report")
+
+if st.button("Generate Marks Excel File"):
+    docs = db.collection("student_responses").stream()
+
+    all_rows = []
 
     for doc in docs:
-        data = doc.to_dict() or {}
-        roll = data.get("Roll")
-        section = data.get("Section")
-        responses = data.get("Responses", [])
-        evaldata = data.get("Evaluation", {})
+        data = doc.to_dict()
+        roll = data.get("roll", "")
+        section = data.get("section", "")
 
-        if not roll or not section:
-            continue
+        mcq = data.get("mcq_total", 0)
+        likert = data.get("likert_total", 0)
+        text = data.get("text_total", 0)
+        final_score = data.get("final_total", 0)
+        grand_total = data.get("grand_total", 0)
 
-        df = qbanks.get(section)
+        # Apply NA rules based on the section
+        mcq_out, likert_out, text_out = apply_na(section, mcq, likert, text)
 
-        if df is None:
-            continue
-
-        mcq = calc_mcq(df, responses)
-        likert = calc_likert(df, responses)
-        text = int(evaldata.get("text_total", 0))
-
-        final_score = mcq + likert + text
-
-        grand_totals.setdefault(roll, 0)
-        grand_totals[roll] += final_score
-
-        rows.append({
+        row = {
             "Roll Number": roll,
             "Test Section": section,
-            "MCQ Score": mcq,
-            "Likert Score": likert,
-            "Text Score": text,
+            "MCQ Score": mcq_out,
+            "Likert Score": likert_out,
+            "Text Score": text_out,
             "Final Score (This Test)": final_score,
-            "Grand Total (All Tests)": 0,  # filled later
-        })
+            "Grand Total (All Tests)": grand_total,
+        }
+        all_rows.append(row)
 
-    # Second pass: fill final totals
-    for row in rows:
-        row["Grand Total (All Tests)"] = grand_totals[row["Roll Number"]]
+    df = pd.DataFrame(all_rows)
 
-    df_export = pd.DataFrame(rows)
+    # ----------------------------
+    # Download Button
+    # ----------------------------
+    st.success("Marks file generated successfully!")
 
-    # Show preview
-    st.dataframe(df_export)
-
-    # Download
     st.download_button(
-        label="💾 Download Excel / CSV",
-        data=df_export.to_csv(index=False).encode("utf-8"),
-        file_name="final_student_marks.csv",
+        label="⬇ Download Excel File",
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name="Student_Marks_Report.csv",
         mime="text/csv"
     )
 
-    st.success("Report generated successfully ✔️")
+    st.dataframe(df)
