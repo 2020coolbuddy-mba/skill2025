@@ -33,9 +33,10 @@ if not db:
 
 st.title("📤 Export Evaluated Marks")
 
-# -------------------------------------
-# Correct section order & scoring rules
-# -------------------------------------
+
+# ----------------------------------------------------
+# Section Order
+# ----------------------------------------------------
 SECTION_ORDER = [
     "Adaptability & Learning",
     "Aptitude Test",
@@ -43,62 +44,89 @@ SECTION_ORDER = [
     "Communication Skills - Objective",
 ]
 
-rows = []
 
+# ----------------------------------------------------
+# Fetch all documents
+# ----------------------------------------------------
 docs = db.collection("student_responses").stream()
+
+# roll → { section → scores }
+records = {}
 
 for snap in docs:
     data = snap.to_dict() or {}
 
     roll = data.get("Roll")
     section = data.get("Section")
-    evalb = data.get("Evaluation") or {}
 
     if not roll or not section:
         continue
 
+    evalb = data.get("Evaluation") or {}
+
     mcq = evalb.get("mcq_total")
     likert = evalb.get("likert_total")
-    text = evalb.get("final_total")
-    grand = evalb.get("grand_total")
+    text = evalb.get("text_total")
+    final_test_score = evalb.get("final_total")
 
-    # ---------- FINAL SCORE PER TEST ----------
-    # A) Adaptability & Learning  -> Likert only
-    if section == "Adaptability & Learning":
-        final_score = likert if likert not in (None, "") else "N/A"
+    # Store clean value or N/A
+    def clean(v):
+        return v if (v not in (None, "", {}, [])) else "N/A"
 
-    # B) Aptitude Test -> MCQ + Text
-    elif section == "Aptitude Test":
-        m = mcq if mcq not in (None, "") else 0
-        t = text if text not in (None, "") else 0
-        s = m + t
-        final_score = s if s != 0 else "N/A"
+    mcq = clean(mcq)
+    likert = clean(likert)
+    text = clean(text)
+    final_test_score = clean(final_test_score)
 
-    # C) Communication Skills – Descriptive -> Text only
-    elif section == "Communication Skills - Descriptive":
-        final_score = text if text not in (None, "") else "N/A"
+    if roll not in records:
+        records[roll] = {}
 
-    # D) Communication Skills – Objective -> MCQ only
-    elif section == "Communication Skills - Objective":
-        final_score = mcq if mcq not in (None, "") else "N/A"
+    records[roll][section] = {
+        "mcq": mcq,
+        "likert": likert,
+        "text": text,
+        "final_test_score": final_test_score
+    }
 
-    else:
-        final_score = "N/A"
 
-    # normalise empty to "N/A" for export
-    mcq = mcq if mcq not in (None, "") else "N/A"
-    likert = likert if likert not in (None, "") else "N/A"
-    text = text if text not in (None, "") else "N/A"
+# ----------------------------------------------------
+# Build final export rows
+# ----------------------------------------------------
+rows = []
 
-    rows.append([
-        roll,
-        section,
-        mcq,
-        likert,
-        text,
-        final_score,
-        grand,
-    ])
+for roll, tests in records.items():
+
+    # compute grand total from per-test final scores
+    grand_total = 0
+    for sec in SECTION_ORDER:
+        block = tests.get(sec, {})
+        v = block.get("final_test_score")
+        if isinstance(v, int):
+            grand_total += v
+
+    # Now create row per test (in correct order)
+    for i, sec in enumerate(SECTION_ORDER):
+        block = tests.get(sec, {})
+        mcq = block.get("mcq", "N/A")
+        likert = block.get("likert", "N/A")
+        text = block.get("text", "N/A")
+        final_test_score = block.get("final_test_score", "N/A")
+
+        # Show grand total only on 1st row of each roll
+        if i == 0:
+            g = grand_total
+        else:
+            g = ""
+
+        rows.append([
+            roll,
+            sec,
+            mcq,
+            likert,
+            text,
+            final_test_score,
+            g,
+        ])
 
 df = pd.DataFrame(rows, columns=[
     "Roll Number",
@@ -107,37 +135,10 @@ df = pd.DataFrame(rows, columns=[
     "Likert Score",
     "Text Score",
     "Final Score (This Test)",
-    "Grand Total (All Tests)",
+    "Grand Total (All Tests)"
 ])
 
-# -------------------------------------
-# Apply custom section order per roll
-# -------------------------------------
-cat = pd.CategoricalDtype(categories=SECTION_ORDER, ordered=True)
-df["Section"] = df["Section"].astype(cat)
+st.dataframe(df)
 
-df = df.sort_values(["Roll Number", "Section"])
-
-# Only show Grand Total on the first section row of each roll
-clean_rows = []
-last_roll = None
-for _, r in df.iterrows():
-    rr = r.copy()
-    if rr["Roll Number"] == last_roll:
-        rr["Grand Total (All Tests)"] = ""
-    else:
-        last_roll = rr["Roll Number"]
-    clean_rows.append(rr)
-
-df_final = pd.DataFrame(clean_rows)
-
-st.dataframe(df_final)
-
-csv = df_final.to_csv(index=False).encode("utf-8")
-
-st.download_button(
-    "⬇ Download CSV",
-    csv,
-    "evaluated_marks.csv",
-    "text/csv",
-)
+csv = df.to_csv(index=False).encode("utf-8")
+st.download_button("⬇ Download CSV", csv, "evaluated_marks.csv", "text/csv")
