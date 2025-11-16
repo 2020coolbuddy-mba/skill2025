@@ -1,92 +1,164 @@
 import streamlit as st
 import pandas as pd
+import json
 import firebase_admin
 from firebase_admin import credentials, firestore
-import json
 
-
-# ------------------------------------------------
-# FIREBASE INITIALIZATION (Stable Version)
-# ------------------------------------------------
+# -------------------------------------------------------------
+# FIREBASE INITIALIZE
+# -------------------------------------------------------------
 @st.cache_resource
 def init_firebase():
     if firebase_admin._apps:
         return firestore.client()
 
     try:
-        if "firebase" in st.secrets:
-            cfg = dict(st.secrets["firebase"])
-            cred = credentials.Certificate(cfg)
-            firebase_admin.initialize_app(cred)
-        else:
-            with open("firebase_key.json", "r") as f:
-                cfg = json.load(f)
-            cred = credentials.Certificate(cfg)
-            firebase_admin.initialize_app(cred)
-    except Exception as e:
-        st.error(f"Firebase initialization failed: {e}")
-        return None
-
-    return firestore.client()
-
+        # Load from Streamlit secrets
+        cfg = dict(st.secrets["firebase"])
+        cred = credentials.Certificate(cfg)
+        firebase_admin.initialize_app(cred)
+        return firestore.client()
+    except:
+        st.error("Firebase initialization failed. Check credentials.")
+        st.stop()
 
 db = init_firebase()
-if db is None:
-    st.stop()
+
+st.title("📊 Download Student Marks (Auto + Manual Evaluation)")
+
+# -------------------------------------------------------------
+# LOAD QUESTION BANKS (same filenames used in your evaluation)
+# -------------------------------------------------------------
+@st.cache_data
+def load_qbanks():
+    return {
+        "Aptitude Test": pd.read_csv("aptitude.csv"),
+        "Adaptability & Learning": pd.read_csv("adaptability_learning.csv"),
+        "Communication Skills - Objective": pd.read_csv("communication_skills_objective.csv"),
+        "Communication Skills - Descriptive": pd.read_csv("communication_skills_descriptive.csv"),
+    }
+
+qbanks = load_qbanks()
+
+# -------------------------------------------------------------
+# LIKERT SCORING (your correct rule)
+# 1 → 0
+# 2 → 1
+# 3 → 2
+# 4 → 3
+# 5 → 3
+# -------------------------------------------------------------
+def likert_to_score(v):
+    v = int(v)
+    if v == 1: return 0
+    if v == 2: return 1
+    if v == 3: return 2
+    if v in [4, 5]: return 3
+    return 0
 
 
-# ------------------------------------------------
-#   UI HEADER
-# ------------------------------------------------
-st.title("📥 Download Student Marks")
-st.write("This tool exports **all evaluated test results** stored in the `student_responses` Firestore collection.")
+# -------------------------------------------------------------
+# MCQ SCORING
+# -------------------------------------------------------------
+def get_correct_answer(row):
+    for col in ["Answer", "CorrectAnswer", "Correct", "Ans", "AnswerKey"]:
+        if col in row and not pd.isna(row[col]):
+            return str(row[col]).strip()
+    return None
 
 
-# ------------------------------------------------
-#   FETCH ALL MARKS FROM FIRESTORE
-# ------------------------------------------------
-def fetch_marks():
-    docs = db.collection("student_responses").stream()
+def calc_mcq(df, responses):
+    score = 0
+    for r in responses:
+        qid = str(r["QuestionID"])
+        ans = str(r["Response"]).strip()
+        row_df = df[df["QuestionID"].astype(str) == qid]
+        if row_df.empty:
+            continue
+        row = row_df.iloc[0]
+        if row["Type"] != "mcq":
+            continue
+        correct = get_correct_answer(row)
+        if correct and ans == correct:
+            score += 1
+    return score
+
+
+# -------------------------------------------------------------
+# LIKERT SCORING
+# -------------------------------------------------------------
+def calc_likert(df, responses):
+    total = 0
+    for r in responses:
+        qid = str(r["QuestionID"])
+        ans = r["Response"]
+        row_df = df[df["QuestionID"].astype(str) == qid]
+        if row_df.empty:
+            continue
+        row = row_df.iloc[0]
+        if str(row["Type"]).lower() != "likert":
+            continue
+        total += likert_to_score(ans)
+    return total
+
+
+# -------------------------------------------------------------
+# DOWNLOAD BUTTON
+# -------------------------------------------------------------
+if st.button("📥 Generate Marks Excel File"):
+    docs = list(db.collection("student_responses").stream())
     rows = []
+    grand_totals = {}
 
     for doc in docs:
-        data = doc.to_dict()
-
+        data = doc.to_dict() or {}
         roll = data.get("Roll")
         section = data.get("Section")
-        eval_data = data.get("Evaluation", {})
+        responses = data.get("Responses", [])
+        evaldata = data.get("Evaluation", {})
+
+        if not roll or not section:
+            continue
+
+        df = qbanks.get(section)
+
+        if df is None:
+            continue
+
+        mcq = calc_mcq(df, responses)
+        likert = calc_likert(df, responses)
+        text = int(evaldata.get("text_total", 0))
+
+        final_score = mcq + likert + text
+
+        grand_totals.setdefault(roll, 0)
+        grand_totals[roll] += final_score
 
         rows.append({
             "Roll Number": roll,
             "Test Section": section,
-            "MCQ Score": eval_data.get("mcq_total", 0),
-            "Likert Score": eval_data.get("likert_total", 0),
-            "Text Score": eval_data.get("text_total", 0),
-            "Final Score (This Test)": eval_data.get("final_total", 0),
-            "Grand Total": eval_data.get("grand_total", 0)
+            "MCQ Score": mcq,
+            "Likert Score": likert,
+            "Text Score": text,
+            "Final Score (This Test)": final_score,
+            "Grand Total (All Tests)": 0,  # filled later
         })
 
-    df = pd.DataFrame(rows)
-    return df
+    # Second pass: fill final totals
+    for row in rows:
+        row["Grand Total (All Tests)"] = grand_totals[row["Roll Number"]]
 
+    df_export = pd.DataFrame(rows)
 
-# ------------------------------------------------
-#   DOWNLOAD BUTTON
-# ------------------------------------------------
-if st.button("📥 Generate CSV File"):
-    df = fetch_marks()
+    # Show preview
+    st.dataframe(df_export)
 
-    if df.empty:
-        st.warning("No student data found in Firestore.")
-    else:
-        csv = df.to_csv(index=False).encode("utf-8")
+    # Download
+    st.download_button(
+        label="💾 Download Excel / CSV",
+        data=df_export.to_csv(index=False).encode("utf-8"),
+        file_name="final_student_marks.csv",
+        mime="text/csv"
+    )
 
-        st.success("CSV file generated successfully!")
-        st.download_button(
-            label="⬇ Download Student Marks CSV",
-            data=csv,
-            file_name="student_marks.csv",
-            mime="text/csv"
-        )
-
-        st.dataframe(df, use_container_width=True)
+    st.success("Report generated successfully ✔️")
