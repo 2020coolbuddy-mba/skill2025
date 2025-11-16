@@ -441,4 +441,4 @@ if st.button("💾 Save Evaluation"):
         )
 
     st.success("Evaluation saved successfully ✅")
-    st.experimental_rerun()
+    st.rerun()
